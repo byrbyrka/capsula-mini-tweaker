@@ -1,0 +1,3 @@
+Palette extracted from the supplied stock/system_a.bin, /usr/share/voice-agent/led.
+volume.json SHA256 7182d360c03331340b65a41b0249a4b27d49875935d6788b7b5cc08238b07429
+mic_off.json SHA256 804bb6c51c467626a36a6a4b3cce64f522cfff7c70d906a3b71ac212e4fd7588

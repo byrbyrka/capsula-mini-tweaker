@@ -1,0 +1,20 @@
+#!/sbin/openrc-run
+
+description="Native VK Mini buttons, sound, display and ring"
+command="/usr/local/bin/capsule-tweaker"
+command_args="--daemon"
+supervisor="supervise-daemon"
+respawn_delay=3
+respawn_max=5
+respawn_period=60
+stopsig="TERM"
+retry="TERM/5/KILL/2"
+
+depend() {
+    need alsa
+    after local bluealsa-aplay
+}
+
+start_pre() {
+    checkpath --directory --mode 0755 /var/lib/capsule-controls
+}

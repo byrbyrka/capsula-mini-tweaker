@@ -1,0 +1,45 @@
+{
+  "version": "1.0.0",
+  "target": "Alpine Linux aarch64 / musl / VK Mini Amlogic A113X",
+  "binary_bytes": 61768,
+  "binary_sha256": "507b98f48136e7b78c5a45254051e5dc1ad3546614cd1f2832f20cf629291fec",
+  "runtime_libraries": [
+    "libc.musl-aarch64.so.1"
+  ],
+  "idle_children_with_face_and_ring_off": 0,
+  "host_measurement": {
+    "platform": "x86_64 / glibc; simulated hardware",
+    "host_rss_kib": 2412,
+    "host_cpu_percent_during_face": 0.0,
+    "cpu_sample_seconds": 3,
+    "target_device_measurement": false
+  },
+  "verification": {
+    "native_core_assertions": 1048,
+    "alsa_ioctl_assertions": 56,
+    "integration_test": "passed",
+    "asan_ubsan": "passed",
+    "arm64_qemu_core_assertions": 1048,
+    "arm64_qemu_alsa_ioctl_assertions": 56,
+    "arm64_binary_with_firmware_musl": "passed",
+    "hardware_test": false,
+    "native_preset_assertions": 1115,
+    "arm64_qemu_preset_assertions": 1115,
+    "preset_menu_animation_priorities_restart": "passed",
+    "native_display_assertions": 91,
+    "arm64_qemu_display_assertions": 91,
+    "display_regression": "passed",
+    "display_retry_and_idle_writes": "passed",
+    "clang_static_analysis": "passed; no warnings",
+    "config_migration_and_action_validation": "passed"
+  },
+  "chord": "mute + action enters ring editing; +/- selects; action confirms; mute cancels",
+  "presets": {
+    "max_presets": 16,
+    "max_frames": 12,
+    "min_frame_ms": 250,
+    "max_frame_ms": 10000,
+    "saved_with": "/etc/capsule-tweaker.conf",
+    "new_runtime_libraries": []
+  }
+}
