@@ -63,6 +63,14 @@ void ipc_receive(App *a, double now) {
     ok = app_update(a, value, 0, a->state.mode, now);
   else if (sscanf(request, "MODE %d %c", &value, &extra) == 1)
     ok = app_update(a, a->state.volume, a->state.muted, value, now);
+  else if (sscanf(request, "AP2 %d %c", &value, &extra) == 1) {
+    if (value < 0 || value > 2)
+      ok = -1;
+    else {
+      a->ap2_state = value;
+      a->ring.last = 0;
+    }
+  }
   else if (sscanf(request, "RING %d %c", &value, &extra) == 1) {
     if (value < 0 || value >= ring_effect_count(&a->cfg))
       ok = -1;

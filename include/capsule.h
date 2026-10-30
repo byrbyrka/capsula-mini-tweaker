@@ -89,6 +89,7 @@ typedef struct App {
   size_t input_used;
   bool dirty, config_dirty, editing;
   int old_effect, feedback;
+  int ap2_state;
   double save_at, feedback_until, overlay_until, reconnect;
   char overlay[8];
 } App;

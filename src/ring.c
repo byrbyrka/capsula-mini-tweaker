@@ -41,6 +41,34 @@ void ring_frame(const Config *c, int volume, bool muted, int feedback,
   }
   rotate(c, src, out);
 }
+// AirPlay state: 1 = sender connected (steady dim ring), 2 = playing
+// (a dot running around the ring). The tweaker stays the only ring writer.
+static void ap2_frame(int state, double now, unsigned char out[36]) {
+  memset(out, 0, 36);
+  if (state == 1) {
+    for (int i = 0; i < 12; i++) {
+      out[i * 3] = 0;
+      out[i * 3 + 1] = 24;
+      out[i * 3 + 2] = 72;
+    }
+    return;
+  }
+  int pos = ((int)(now * 2)) % 12;
+  if (pos < 0)
+    pos += 12;
+  for (int i = 0; i < 12; i++) {
+    if (i == pos) {
+      out[i * 3] = 0;
+      out[i * 3 + 1] = 255;
+      out[i * 3 + 2] = 219;
+    } else {
+      out[i * 3] = 0;
+      out[i * 3 + 1] = 16;
+      out[i * 3 + 2] = 14;
+    }
+  }
+}
+
 static uint64_t frame_hash(const unsigned char *b, int brightness) {
   uint64_t h = (uint64_t)brightness + 1;
   for (int i = 0; i < 36; i++)
@@ -60,6 +88,7 @@ void ring_tick(App *a, double now) {
   int feedback = now < a->feedback_until ? a->feedback : FEEDBACK_NONE;
   if (a->editing)
     feedback = FEEDBACK_NONE;
+  bool ap2 = a->ap2_state != 0 && !muted && feedback == FEEDBACK_NONE;
   const RingPreset *p =
       a->cfg.effect >= FX_COUNT && a->cfg.effect < ring_effect_count(&a->cfg)
           ? &a->cfg.presets[a->cfg.effect - FX_COUNT]
@@ -69,7 +98,7 @@ void ring_tick(App *a, double now) {
                        ? p->brightness
                        : a->cfg.ring_brightness;
   int speed_ms = p ? p->speed : a->cfg.ring_speed;
-  bool animated = !muted && feedback == FEEDBACK_NONE &&
+  bool animated = !muted && feedback == FEEDBACK_NONE && !ap2 &&
                   (effect == FX_RAINBOW || effect == FX_FIRE);
   char bright[12];
   snprintf(bright, sizeof bright, "%d", brightness);
@@ -103,15 +132,23 @@ void ring_tick(App *a, double now) {
   }
   stop_child(&r->child);
   unsigned char frame[36];
-  ring_frame(&a->cfg, a->state.volume, muted, feedback, frame);
-  if (p && !muted && feedback == FEEDBACK_NONE && effect == FX_FRAMES) {
+  if (ap2) {
     unsigned char src[36];
-    preset_frame(p, now - r->epoch, src);
+    ap2_frame(a->ap2_state, now, src);
     rotate(&a->cfg, src, frame);
-    if (p->count > 1) {
-      unsigned long long index =
-          (unsigned long long)((now - r->epoch) * 1000 / p->frame_ms);
-      r->next = r->epoch + (index + 1) * (p->frame_ms / 1000.0);
+    if (a->ap2_state == 2)
+      r->next = now + 0.2;
+  } else {
+    ring_frame(&a->cfg, a->state.volume, muted, feedback, frame);
+    if (p && !muted && feedback == FEEDBACK_NONE && effect == FX_FRAMES) {
+      unsigned char src[36];
+      preset_frame(p, now - r->epoch, src);
+      rotate(&a->cfg, src, frame);
+      if (p->count > 1) {
+        unsigned long long index =
+            (unsigned long long)((now - r->epoch) * 1000 / p->frame_ms);
+        r->next = r->epoch + (index + 1) * (p->frame_ms / 1000.0);
+      }
     }
   }
   uint64_t hash = frame_hash(frame, brightness);
